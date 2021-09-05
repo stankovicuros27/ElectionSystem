@@ -18,7 +18,7 @@ class User (database.Model):
 class Role (database.Model):
     __tablename__ = "roles"
     id = database.Column (database.Integer, primary_key = True)
-    name = database.Column (database.String(256), nullable = False)
+    name = database.Column (database.String(256), nullable = False, unique = True)
     users = database.relationship("User", back_populates = "role")
 
     def __repr__ ( self ):

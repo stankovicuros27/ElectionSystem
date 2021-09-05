@@ -5,7 +5,7 @@ from configuration import Configuration
 from models import database
 from sqlalchemy_utils import database_exists, create_database
 
-application = Flask( __name__ )
+application = Flask(__name__)
 application.config.from_object(Configuration)
 
 migrate = Migrate(application, database)
