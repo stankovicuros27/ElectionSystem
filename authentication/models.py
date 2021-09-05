@@ -13,7 +13,7 @@ class User (database.Model):
     role = database.relationship ("Role", back_populates = "users")
 
     def __repr__ ( self ):
-        return f"{self.forename} {self.surname} {self.email} {self.uniqueId} {self.role}"
+        return f"{self.forename} {self.surname} {self.email} {self.jmbg} {self.role}"
 
 class Role (database.Model):
     __tablename__ = "roles"

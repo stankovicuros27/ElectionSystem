@@ -7,14 +7,17 @@ from flask_jwt_extended import JWTManager, create_access_token, \
 from sqlalchemy import and_
 from configuration import Configuration
 from roleDecorator import roleCheck
+from display import displayBlueprint
 
 application = Flask(__name__)
-application.config.from_object(Configuration);
+application.config.from_object(Configuration)
+application.register_blueprint(displayBlueprint, url_prefix = "/display")
 
 @application.route("/", methods=["GET"])
 def index():
     return "Welcome to authentication service!<br>" \
            "Available routes are:<br><br>" \
+           " \"/display\",<br>" \
            " \"/register\",<br>" \
            " \"/login\",<br>" \
            " \"/check\",<br>" \
@@ -95,11 +98,10 @@ def login():
     accessToken = create_access_token (identity = user.email, additional_claims = additionalClaims)
     refreshToken = create_refresh_token (identity = user.email, additional_claims = additionalClaims)
 
-    return Response(
+    return jsonify(
         accessToken = accessToken,
-        refreshToken = refreshToken,
-        status = 200
-    )
+        refreshToken = refreshToken
+    ), 200;
 
 @application.route("/check", methods=["POST"])
 @jwt_required()
@@ -119,10 +121,9 @@ def refresh():
         "role": refreshClaims["role"]
     }
 
-    return Response(
-        accessToken = create_access_token(identity = identity, additional_claims = additionalClaims),
-        status = 200
-    )
+    return jsonify(
+        accessToken = create_access_token (identity = identity, additional_claims = additionalClaims)
+    ), 200
 
 @application.route("/delete", methods=["POST"])
 @roleCheck(role = "admin")
