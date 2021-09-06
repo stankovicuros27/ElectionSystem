@@ -73,7 +73,7 @@ def createElection():
         return Response("Field name is missing.", status = 400)
     if not validStartAndEndDates(start, end) or electionsBetweenExists(start, end):
         return Response("Invalid date and time.", status = 400)
-    if not validParticipants(participants):
+    if not validParticipants(participants, individual):
         return Response("Invalid participant.", status=400)
 
     election = Election(
@@ -95,7 +95,8 @@ def createElection():
             participantNumber = nextParticipantNumber
         )
         database.session.add(electionParticipant)
-        database.session.commit()
+
+    database.session.commit()
 
     return jsonify(pollNumbers = participantsNumbers), 200
 
