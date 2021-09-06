@@ -7,9 +7,11 @@ from elections.utils import nameIsValid, emailIsValid, \
     passwordIsValid, jmbgIsValid, participantType, \
     isIndividual, validStartAndEndDates, electionsBetweenExists, \
     validParticipants
+from flask_jwt_extended import JWTManager
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
+jwt = JWTManager(application)
 
 @application.route("/", methods = ["GET"])
 def index():
