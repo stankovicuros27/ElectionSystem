@@ -6,7 +6,7 @@ from flask_jwt_extended import JWTManager, create_access_token, \
     get_jwt_identity
 from sqlalchemy import and_
 from configuration import Configuration
-from roleDecorator import roleCheck
+from roleDecorator import roleDecorator
 from display import displayBlueprint
 
 application = Flask(__name__)
@@ -126,7 +126,7 @@ def refresh():
     ), 200
 
 @application.route("/delete", methods=["POST"])
-@roleCheck(role = "admin")
+@roleDecorator(role = "admin")
 def delete():
     email = request.json.get("email", "")
 
