@@ -24,7 +24,6 @@ def index():
            " \"/refresh\",<br>" \
            " \"/delete\"<br>"
 
-# TODO implement util functions for checking
 @application.route("/register", methods=["POST"])
 def register():
     jmbg = request.json.get("jmbg", "")
@@ -34,6 +33,7 @@ def register():
     surname = request.json.get("surname", "")
 
     if len(jmbg) == 0:
+        #return jsonify({'message': 'Field jmbg is missing.'}), 400;
         return Response("Field jmbg is missing.", status = 400)
     if len(email) == 0:
         return Response("Field email is missing.", status = 400)
@@ -66,6 +66,7 @@ def register():
         database.session.add(user)
         database.session.commit()
     except:
+        #return jsonify({'message': 'JMBG already exists.'}), 400;
         return Response("JMBG already exists.")
 
     return Response(status = 200)
@@ -86,22 +87,20 @@ def login():
 
     user = User.query.filter(and_(User.email == email, User.password == password)).first()
     if not user:
+        #return jsonify({'message': 'Invalid credentials.'}), 400;
         return Response ("Invalid credentials.", status = 400)
 
     additionalClaims = {
         "jmbg": user.jmbg,
         "forename": user.forename,
         "surname": user.surname,
-        "role": str(user.role)
+        "role": user.role.name
     }
 
-    accessToken = create_access_token (identity = user.email, additional_claims = additionalClaims)
-    refreshToken = create_refresh_token (identity = user.email, additional_claims = additionalClaims)
-
     return jsonify(
-        accessToken = accessToken,
-        refreshToken = refreshToken
-    ), 200;
+        accessToken = create_access_token (identity = user.email, additional_claims = additionalClaims),
+        refreshToken = create_refresh_token (identity = user.email, additional_claims = additionalClaims)
+    ), 200
 
 @application.route("/check", methods=["POST"])
 @jwt_required()
@@ -131,6 +130,7 @@ def delete():
     email = request.json.get("email", "")
 
     if len(email) == 0:
+        #return jsonify({'message': 'Field email is missing.'}), 400;
         return Response("Field email is missing.", status = 400)
     if not emailIsValid(email):
         return Response("Invalid email.", status = 400)
@@ -141,7 +141,8 @@ def delete():
 
     database.session.delete(user)
     database.session.commit()
-    return Response("OK", status = 200)
+
+    return Response(status = 200)
 
 if (__name__ == "__main__"):
     database.init_app(application)

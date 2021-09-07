@@ -5,8 +5,8 @@ database = SQLAlchemy()
 class ElectionParticipant(database.Model):
     __tablename__ = "electionparticipants"
     id = database.Column(database.Integer, primary_key = True)
-    electionId = database.Column(database.Integer, database.ForeignKey("elections.id"))
-    participantId = database.Column(database.Integer, database.ForeignKey("participants.id"))
+    electionId = database.Column(database.Integer, database.ForeignKey("elections.id"), nullable = False)
+    participantId = database.Column(database.Integer, database.ForeignKey("participants.id"), nullable = False)
     participantNumber = database.Column(database.Integer, nullable = False)
 
 class Participant(database.Model):
@@ -40,6 +40,8 @@ class Vote(database.Model):
     id = database.Column(database.Integer, primary_key = True)
     guid = database.Column(database.String(36), nullable = False)
     electionId = database.Column(database.Integer, database.ForeignKey('elections.id'), nullable = False)
+    jmbg = database.Column(database.String(13), nullable = False)
     voteFor = database.Column(database.Integer, nullable = False)
     election = database.relationship("Election", back_populates = "votes")
+    invalid = database.Column(database.String(256), nullable = True)
 
