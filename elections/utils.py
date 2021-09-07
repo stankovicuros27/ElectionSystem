@@ -1,7 +1,7 @@
 from re import match, search
 import datetime
 from email.utils import parseaddr
-from models import Election, Participant
+from elections.models import Election, Participant
 from sqlalchemy import and_, or_
 
 def jmbgIsValid(jmbg):

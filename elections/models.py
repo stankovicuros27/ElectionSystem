@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from utils import isIndividual
 
 database = SQLAlchemy()
 
@@ -21,6 +22,20 @@ class Participant(database.Model):
     def __repr__(self):
         return f"{self.name} {self.id} {self.type}"
 
+    def json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "individual": isIndividual(self.type)
+        }
+
+    def jsonForElection(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "individual": isIndividual(self.type)
+        }
+
 class Election(database.Model):
     __tablename__ = "elections"
     id = database.Column(database.Integer, primary_key = True)
@@ -35,6 +50,18 @@ class Election(database.Model):
     def __repr__(self):
         return f"{self.id} {self.type} {self.start} {self.end}"
 
+    def json(self):
+        participants = []
+        for participant in self.participants:
+            participants.append(participant.jsonForElection())
+        return {
+            "id": self.id,
+            "start": self.start,
+            "end": self.end,
+            "individual": isIndividual(self.type),
+            "participants": participants
+        }
+
 class Vote(database.Model):
     __tablename__ = "votes"
     id = database.Column(database.Integer, primary_key = True)
@@ -44,4 +71,16 @@ class Vote(database.Model):
     voteFor = database.Column(database.Integer, nullable = False)
     election = database.relationship("Election", back_populates = "votes")
     invalid = database.Column(database.String(256), nullable = True)
+
+    def __repr__(self):
+        return f"{self.id} {self.guid} {self.jmbg} {self.election} {self.voteFor}"
+
+    def json(self):
+        return {
+            "id": self.id,
+            "guid": self.guid,
+            "jmbg": self.jmbg,
+            "election": self.election,
+            "voteFor": self.voteFor
+        }
 

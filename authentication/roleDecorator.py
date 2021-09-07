@@ -8,7 +8,7 @@ def roleDecorator(role):
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
             claims = get_jwt()
-            if "roles" in claims and role in claims["roles"]:
+            if "role" in claims and role == claims["role"]:
                 return function(*args, **kwargs)
             else:
                 return Response("Permission denied!", status = 403)

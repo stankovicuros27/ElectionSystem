@@ -24,7 +24,7 @@ def index():
            " \"/getResults\"<br>" \
 
 @application.route("/createParticipant", methods = ["POST"])
-#@roleDecorator(role = "admin")
+@roleDecorator(role = "admin")
 def createParticipant():
     name = request.json.get("name", "")
     individual = request.json.get("individual", None)
@@ -43,20 +43,16 @@ def createParticipant():
     return jsonify(id=participant.id), 200
 
 @application.route("/getParticipants", methods = ["GET"])
-#@roleDecorator(role = "admin")
+@roleDecorator(role = "admin")
 def getParticipants():
-    ret = []
+    participantJsons = []
     for participant in Participant.query.all():
-        ret.append({
-            'id': participant.id,
-            'name': participant.name,
-            'individual': isIndividual(participant.type)
-        })
+        participantJsons.append(participant.json())
 
-    return jsonify(participants = ret), 200
+    return jsonify(participants = participantJsons), 200
 
 @application.route("/createElection", methods=["POST"])
-#@roleDecorator(role = "admin")
+@roleDecorator(role = "admin")
 def createElection():
     start = request.json.get("start", "")
     end = request.json.get("end", "")
@@ -101,24 +97,13 @@ def createElection():
     return jsonify(pollNumbers = participantsNumbers), 200
 
 @application.route("/getElections", methods=["GET"])
-#@roleDecorator(role = "admin")
+@roleDecorator(role = "admin")
 def getElections():
-    elections = Election.query.all()
-    return_elections_json_array = []
-    for election in elections:
-        return_elections_json_array.append({
-            'id': election.id,
-            'start': election.start,
-            'end': election.end,
-            'individual': isIndividual(election.type),
-            'participants': [
-                {
-                    "id": participant.id,
-                    "name": participant.name
-                }
-                for participant in election.participants]
-        })
-    return jsonify(elections = return_elections_json_array), 200
+    electionJsons = []
+    for election in Election.query.all():
+        electionJsons.append(election.json())
+
+    return jsonify(elections = electionJsons), 200
 
 if __name__ == "__main__":
     database.init_app(application)

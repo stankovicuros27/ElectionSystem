@@ -1,12 +1,8 @@
 from flask import Flask, request, Response, jsonify
 from elections.configuration import Configuration
-from elections.models import database, Participant, \
-    Election, ElectionParticipant, Vote
 from elections.roleDecorator import roleDecorator
 from elections.utils import nameIsValid, emailIsValid, \
-    passwordIsValid, jmbgIsValid, participantType, \
-    isIndividual, validStartAndEndDates, electionsBetweenExists, \
-    validParticipants
+    passwordIsValid, jmbgIsValid
 from flask_jwt_extended import JWTManager, get_jwt, jwt_required
 from redis import Redis
 import io
@@ -43,8 +39,8 @@ def vote():
         lineCnt += 1
 
     jmbg = get_jwt().get("jmbg", "")
-    if not jmbgIsValid(jmbg):
-        return Response("Invalid jmbg.", status = 400)
+    #if not jmbgIsValid(jmbg):
+        #return Response("Invalid jmbg.", status = 400)
 
     time = datetime.datetime.now()
 

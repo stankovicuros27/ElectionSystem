@@ -13,7 +13,16 @@ class User (database.Model):
     role = database.relationship ("Role", back_populates = "users")
 
     def __repr__ ( self ):
-        return f"{self.forename} {self.surname} {self.email} {self.jmbg} {self.role}"
+        return f"{self.forename} {self.surname} {self.email} {self.jmbg} {self.role.name}"
+
+    def json(self):
+        return {
+            "forename": self.forename,
+            "surname": self.surname,
+            "email": self.email,
+            "role": self.role.name
+        }
+
 
 class Role (database.Model):
     __tablename__ = "roles"
@@ -23,3 +32,9 @@ class Role (database.Model):
 
     def __repr__ ( self ):
         return f"{self.name} {str(self.users)}"
+
+    def json(self):
+        return {
+            "name": self.name,
+            "users": self.users
+        }
