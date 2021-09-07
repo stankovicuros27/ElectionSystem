@@ -13,6 +13,12 @@ application = Flask(__name__)
 application.config.from_object(Configuration)
 jwt = JWTManager(application)
 
+@application.route("/", methods=["GET"])
+def index():
+    return "Welcome to voting service!<br>" \
+           "Available routes are:<br><br>" \
+           " \"/vote\"<br>"
+
 @application.route("/vote", methods=["POST"])
 @jwt_required()
 @roleDecorator(role = "zvanicnik")
@@ -47,7 +53,7 @@ def vote():
     reader = csv.reader(io.StringIO(fileData))
     lineCnt = 0
 
-    with Redis(host=Configuration.REDIS_HOST) as redis:
+    with Redis(host = Configuration.REDIS_HOST) as redis:
         for row in reader:
             vote = f"{time};{jmbg};{row[0]};{row[1]}"
             redis.rpush(

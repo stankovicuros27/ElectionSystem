@@ -36,11 +36,11 @@ def createParticipant():
     if not nameIsValid(name):
         return Response("Invalid name.", status = 400)
 
-    participant = Participant( name=name, type = participantType(individual))
+    participant = Participant(name = name, type = participantType(individual))
     database.session.add(participant)
     database.session.commit()
 
-    return jsonify(id=participant.id), 200
+    return jsonify(id = participant.id), 200
 
 @application.route("/getParticipants", methods = ["GET"])
 @roleDecorator(role = "admin")
@@ -60,13 +60,13 @@ def createElection():
     participants = request.json.get("participants", None)
 
     if len(start) == 0:
-        return Response("Field name is missing.", status = 400)
+        return Response("Field start is missing.", status = 400)
     if len(end) == 0:
-        return Response("Field name is missing.", status = 400)
-    if individual is None or not isinstance(individual, bool):
-        return Response("Field name is missing.", status = 400)
+        return Response("Field end is missing.", status = 400)
+    if individual is None:
+        return Response("Field individual is missing.", status = 400)
     if participants is None:
-        return Response("Field name is missing.", status = 400)
+        return Response("Field participants is missing.", status = 400)
     if not validStartAndEndDates(start, end) or electionsBetweenExists(start, end):
         return Response("Invalid date and time.", status = 400)
     if not validParticipants(participants, individual):
@@ -104,6 +104,23 @@ def getElections():
         electionJsons.append(election.json())
 
     return jsonify(elections = electionJsons), 200
+
+
+@application.route("/getResults", methods = ["GET"])
+@roleCheck(role = "admin")
+def getResults():
+    # TODO finish
+    id = request.args.get("id", None)
+
+    if id is None:
+        return jsonify(message="Field id is missing."), 400
+
+    election = Election.query.filter(Election.id == int(id))
+    if not election:
+        return jsonify(message = "Election does not exist."), 400
+
+    time = datetime.datetime.now()
+
 
 if __name__ == "__main__":
     database.init_app(application)
