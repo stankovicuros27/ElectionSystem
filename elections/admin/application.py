@@ -8,6 +8,8 @@ from elections.utils import nameIsValid, emailIsValid, \
     isIndividual, validStartAndEndDates, electionsBetweenExists, \
     validParticipants
 from flask_jwt_extended import JWTManager
+from datetime import datetime
+from electionResultCalculator import calculatePartyElection, calculateIndividualElection
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
@@ -109,7 +111,6 @@ def getElections():
 @application.route("/getResults", methods = ["GET"])
 @roleCheck(role = "admin")
 def getResults():
-    # TODO finish
     id = request.args.get("id", None)
 
     if id is None:
@@ -119,7 +120,43 @@ def getResults():
     if not election:
         return jsonify(message = "Election does not exist."), 400
 
-    time = datetime.datetime.now()
+    if election.end >= datetime.now().isoformat():
+        return jsonify(message = "Election is ongoing."), 400
+
+    invalidVotes = Vote.query.filter(
+        and_(
+            Vote.invalid != None,
+            Vote.electionId == election.id
+        )
+    ).all()
+
+    invalidVoteJsons = []
+    for invalidVote in invalidVotes:
+        invalidVoteJsons.append(invalidVote.json())
+
+    totalVotesOnElection = 0
+    participantInfos = {}
+    for electionParticipant in ElectionParticipant.query.filter(ElectionParticipant.electionId == election.id):
+        participantInfos[electionParticipant.participantNumber] = {
+            "totalVotes" : Vote.query.filter(
+                and_(
+                    Vote.electionId == election.id,
+                    Vote.voteFor == electionParticipant.participantNumber,
+                    Vote.invalid == None
+                )
+            ),
+            "name" : Participant.query.filter(electionParticipant.participantId == Participant.id).first().name,
+            "pollNumber": electionParticipant.participantNumber
+        }
+        totalVotesOnElection += participantInfos[electionParticipant.participantNumber]["totalVotes"]
+
+    participantResults = []
+    if isIndividual(election.type):
+        participantResults = calculateIndividualElection(participantInfos, totalVotesOnElection)
+    else:
+        participantResults = calculatePartyElection(participantInfos, totalVotesOnElection)
+
+    return jsonify(participants = participantResults, invalidVotes = invalidVoteJsons), 200
 
 
 if __name__ == "__main__":

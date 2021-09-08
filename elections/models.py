@@ -77,10 +77,9 @@ class Vote(database.Model):
 
     def json(self):
         return {
-            "id": self.id,
-            "guid": self.guid,
-            "jmbg": self.jmbg,
-            "election": self.election,
-            "voteFor": self.voteFor
+            "ballotGuid": self.guid,
+            "electionOfficialJmbg": self.jmbg,
+            "reason": self.invalid,
+            "pollNumber": self.voteFor
         }
 
