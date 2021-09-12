@@ -18,6 +18,10 @@ with application.app_context() as context:
             fields = redis.lpop(Configuration.REDIS_LIST).decode("utf-8").split(";")
 
             timestamp = fields[0]
+            jmbg = fields[1]
+            guid = fields[2]
+            voteFor = fields[3]
+
             election = Election.query.filter(
                 and_(
                     Election.start <= parse(timestamp),
@@ -28,13 +32,11 @@ with application.app_context() as context:
                 print(f"No ongoing election for timestamp: {timestamp}")
                 continue
 
-            guid = fields[2]
-            voteFor = fields[3]
             duplicateVote = Vote.query.filter(Vote.guid == guid).first()
             if duplicateVote is not None:
                 print(f"Duplicate vote for guid: {guid}")
                 invalidVote = Vote (
-                    jmbg = fields[1],
+                    jmbg = jmbg,
                     electionId = election.id,
                     voteFor = voteFor,
                     guid = guid,
@@ -44,8 +46,6 @@ with application.app_context() as context:
                 database.session.commit()
                 continue
 
-            guid = fields[2]
-            voteFor = fields[3]
             electionParticipant = ElectionParticipant.query.filter(
                 and_(
                     ElectionParticipant.electionId == election.id,
@@ -55,18 +55,18 @@ with application.app_context() as context:
             if not electionParticipant:
                 print(f"Participant doesn't exist: {voteFor}")
                 invalidVote = Vote(
-                    jmbg=fields[1],
-                    electionId=election.id,
-                    voteFor=voteFor,
-                    guid=guid,
-                    invalid="Invalid poll number."
+                    jmbg = jmbg,
+                    electionId = election.id,
+                    voteFor = voteFor,
+                    guid = guid,
+                    invalid = "Invalid poll number."
                 )
                 database.session.add(invalidVote)
                 database.session.commit()
                 continue
 
             validVote = Vote(
-                jmbg = fields[1],
+                jmbg = jmbg,
                 electionId = election.id,
                 voteFor = voteFor,
                 guid = guid

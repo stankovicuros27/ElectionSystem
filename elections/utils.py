@@ -83,7 +83,7 @@ def validStartAndEndDates(start, end):
 
 
 def electionsBetweenExists(start, end):
-    print (start + " " + end)
+    #print (start + " " + end)
     collidingElectionNum = Election.query.filter(
         or_(
             and_(Election.start <= parse(end), Election.start >= parse(start)),
