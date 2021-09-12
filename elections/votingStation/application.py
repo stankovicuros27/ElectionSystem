@@ -1,6 +1,6 @@
 from flask import Flask, request, Response, jsonify
-from elections.configuration import Configuration
-from elections.roleDecorator import roleDecorator
+from configuration import Configuration
+from roleDecorator import roleDecorator
 from flask_jwt_extended import JWTManager, get_jwt, jwt_required
 from redis import Redis
 import io

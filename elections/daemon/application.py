@@ -1,8 +1,8 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask
 from redis import Redis
-from elections.models import database, Election, Vote, Participant, ElectionParticipant
-from elections.configuration import Configuration
-from sqlalchemy import and_, or_
+from models import database, Election, Vote, ElectionParticipant
+from configuration import Configuration
+from sqlalchemy import and_
 from dateutil.parser import parse
 
 application = Flask(__name__)

@@ -1,10 +1,9 @@
-from flask import Flask, request, Response, jsonify
-from elections.configuration import Configuration
-from elections.models import database, Participant, \
+from flask import Flask, request, jsonify
+from configuration import Configuration
+from models import database, Participant, \
     Election, ElectionParticipant, Vote
-from elections.roleDecorator import roleDecorator
-from elections.utils import nameIsValid, emailIsValid, \
-    passwordIsValid, jmbgIsValid, participantType, \
+from roleDecorator import roleDecorator
+from utils import participantType, \
     isIndividual, validStartAndEndDates, electionsBetweenExists, \
     validParticipants
 from flask_jwt_extended import JWTManager
