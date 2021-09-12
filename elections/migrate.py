@@ -17,6 +17,7 @@ if not database_exists(application.config["SQLALCHEMY_DATABASE_URI"]):
 
 database.init_app(application)
 
+
 with application.app_context() as context:
     init()
     migrate(message = "Production migration.")

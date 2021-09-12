@@ -38,15 +38,3 @@ with application.app_context() as context:
     )
     database.session.add(admin)
     database.session.commit()
-
-    zvanicnik = User(
-        jmbg = "0000000000001",
-        email = "zvanicnik@zvanicnik.com",
-        password = "1",
-        forename = "zvanicnik",
-        surname = "zvanicnik",
-        roleId = zvanicnikRole.id
-    )
-    database.session.add(zvanicnik)
-    database.session.commit()
-

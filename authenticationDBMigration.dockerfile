@@ -9,5 +9,6 @@ COPY authentication/models.py ./models.py
 COPY authentication/requirements.txt ./requirements.txt
 
 RUN pip install -r ./requirements.txt
+RUN rm -rf ./migrations
 
 ENTRYPOINT ["python", "./migrate.py"]

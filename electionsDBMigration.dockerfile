@@ -9,5 +9,6 @@ COPY elections/models.py ./models.py
 COPY elections/requirements.txt ./requirements.txt
 
 RUN pip install -r ./requirements.txt
+RUN rm -rf ./migrations
 
 ENTRYPOINT ["python", "./migrate.py"]

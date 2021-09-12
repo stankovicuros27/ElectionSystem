@@ -4,7 +4,7 @@ RUN mkdir -p /opt/src/authentication
 WORKDIR /opt/src/authentication
 
 COPY authentication/application.py ./application.py
-COPY authentication/configuration.py ./configuration.py
+COPY authentication/configuration.py ./configuration.pywha
 COPY authentication/display.py ./display.py
 COPY authentication/models.py ./models.py
 COPY authentication/roleDecorator.py ./roleDecorator.py
