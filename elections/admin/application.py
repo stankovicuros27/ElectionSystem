@@ -10,6 +10,8 @@ from elections.utils import nameIsValid, emailIsValid, \
 from flask_jwt_extended import JWTManager
 from datetime import datetime
 from electionResultCalculator import calculatePartyElection, calculateIndividualElection
+from sqlalchemy import and_
+from dateutil.parser import parse
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
@@ -32,11 +34,11 @@ def createParticipant():
     individual = request.json.get("individual", None)
 
     if len(name) == 0:
-        return Response("Field name is missing.", status = 400)
+        return jsonify(message = "Field name is missing."), 400
     if individual is None:
-        return Response("Field individual is missing.", status = 400)
-    if not nameIsValid(name):
-        return Response("Invalid name.", status = 400)
+        return jsonify(message = "Field individual is missing."), 400
+    #if not nameIsValid(name):
+    #    return jsonify(message = "Invalid name."), 400
 
     participant = Participant(name = name, type = participantType(individual))
     database.session.add(participant)
@@ -62,17 +64,20 @@ def createElection():
     participants = request.json.get("participants", None)
 
     if len(start) == 0:
-        return Response("Field start is missing.", status = 400)
+        return jsonify(message = "Field start is missing."), 400
     if len(end) == 0:
-        return Response("Field end is missing.", status = 400)
+        return jsonify(message = "Field end is missing."), 400
     if individual is None:
-        return Response("Field individual is missing.", status = 400)
+        return jsonify(message = "Field individual is missing."), 400
     if participants is None:
-        return Response("Field participants is missing.", status = 400)
+        return jsonify(message = "Field participants is missing."), 400
     if not validStartAndEndDates(start, end) or electionsBetweenExists(start, end):
-        return Response("Invalid date and time.", status = 400)
+        return jsonify(message = "Invalid date and time."), 400
     if not validParticipants(participants, individual):
-        return Response("Invalid participant.", status=400)
+        return jsonify(message = "Invalid participants."), 400
+
+    start = parse(str(start))
+    end = parse(str(end))
 
     election = Election(
         start = start,
@@ -109,18 +114,18 @@ def getElections():
 
 
 @application.route("/getResults", methods = ["GET"])
-@roleCheck(role = "admin")
+@roleDecorator(role = "admin")
 def getResults():
     id = request.args.get("id", None)
 
     if id is None:
         return jsonify(message="Field id is missing."), 400
 
-    election = Election.query.filter(Election.id == int(id))
+    election = Election.query.filter(Election.id == int(id)).first()
     if not election:
         return jsonify(message = "Election does not exist."), 400
 
-    if election.end >= datetime.now().isoformat():
+    if election.end >= parse(str(datetime.now())):
         return jsonify(message = "Election is ongoing."), 400
 
     invalidVotes = Vote.query.filter(
@@ -144,7 +149,7 @@ def getResults():
                     Vote.voteFor == electionParticipant.participantNumber,
                     Vote.invalid == None
                 )
-            ),
+            ).count(),
             "name" : Participant.query.filter(electionParticipant.participantId == Participant.id).first().name,
             "pollNumber": electionParticipant.participantNumber
         }
@@ -161,4 +166,4 @@ def getResults():
 
 if __name__ == "__main__":
     database.init_app(application)
-    application.run(debug = True)
+    application.run(debug = True, host = "0.0.0.0", port = 5001)

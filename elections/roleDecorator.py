@@ -1,6 +1,6 @@
 from functools import wraps
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
-from flask import Response
+from flask import jsonify
 
 def roleDecorator(role):
     def innerRole(function):
@@ -11,6 +11,6 @@ def roleDecorator(role):
             if "role" in claims and role == claims["role"]:
                 return function(*args, **kwargs)
             else:
-                return Response("Permission denied!", status = 403)
+                return jsonify(msg = "Missing Authorization Header"), 401
         return decorator
     return innerRole

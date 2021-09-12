@@ -1,11 +1,13 @@
 def calculateIndividualElection(participantInfos, totalVotesOnElection):
     participantResults = []
-    for participantInfo in participantInfos:
+    for key in participantInfos:
         participantResults.append(
             {
-                "pollNumber": participantInfo["pollNumber"],
-                "name": participantInfo["name"],
-                "result": round(participantInfo["totalVotes"] / totalVotesOnElection, 2)
+                "pollNumber": participantInfos[key]["pollNumber"],
+                "name": participantInfos[key]["name"],
+                "result": round(participantInfos[key]["totalVotes"] / totalVotesOnElection, 2)
+                    if totalVotesOnElection != 0
+                    else 0
             }
         )
     return participantResults
@@ -15,17 +17,17 @@ def calculatePartyElection(participantInfos, totalVotesOnElection):
     seatsLeft = 250
     underThreshold = []
     overThreshold = []
-    for participantInfo in participantInfos:
-        participantInfo["seatsSoFar"] = 0
-        if participantInfo["totalVotes"] / totalVotesOnElection >= threshold:
-            overThreshold.append(participantInfo)
+    for key in participantInfos:
+        participantInfos[key]["seatsSoFar"] = 0
+        if totalVotesOnElection != 0 and participantInfos[key]["totalVotes"] / totalVotesOnElection >= threshold:
+            overThreshold.append(participantInfos[key])
         else:
-            underThreshold.append(participantInfo)
+            underThreshold.append(participantInfos[key])
 
     while seatsLeft > 0:
         leadingParty = None
-        maxQuof = 0
-        for party in overLine:
+        maxQuof = -1
+        for party in overThreshold:
             if party["totalVotes"] / (party["seatsSoFar"] + 1) > maxQuof:
                 maxQuof = party["totalVotes"] / (party["seatsSoFar"] + 1)
                 leadingParty = party

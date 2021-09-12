@@ -43,7 +43,7 @@ def emailIsValid(email):
         return False
     if len(parseaddr(email)) == 0:
         return False
-    if match("[^@]+@[^@]+\.[^@]+", email) is None:
+    if match("[^@]+@[^@]+\.[^@]+", email) is None or match('[^@]+@.*\.[a-z]{2,}$', email) is None:
         return False
 
     return True

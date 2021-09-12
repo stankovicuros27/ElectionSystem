@@ -26,9 +26,9 @@ with application.app_context() as context:
     database.session.commit()
 
     admin = User(
-        jmbg = "0000000000001",
+        jmbg = "0000000000000",
         email = "admin@admin.com",
-        password = "admin",
+        password = "1",
         forename = "admin",
         surname = "admin",
         roleId = adminRole.id
@@ -37,9 +37,9 @@ with application.app_context() as context:
     database.session.commit()
 
     zvanicnik = User(
-        jmbg = "0000000000002",
+        jmbg = "0000000000001",
         email = "zvanicnik@zvanicnik.com",
-        password = "zvanicnik",
+        password = "1",
         forename = "zvanicnik",
         surname = "zvanicnik",
         roleId = zvanicnikRole.id

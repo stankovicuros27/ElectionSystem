@@ -12,6 +12,7 @@ from display import displayBlueprint
 application = Flask(__name__)
 application.config.from_object(Configuration)
 application.register_blueprint(displayBlueprint, url_prefix = "/display")
+jwt = JWTManager(application)
 
 @application.route("/", methods=["GET"])
 def index():
@@ -33,24 +34,23 @@ def register():
     surname = request.json.get("surname", "")
 
     if len(jmbg) == 0:
-        #return jsonify({'message': 'Field jmbg is missing.'}), 400;
-        return Response("Field jmbg is missing.", status = 400)
-    if len(email) == 0:
-        return Response("Field email is missing.", status = 400)
-    if len(password) == 0:
-        return Response("Field password is missing.", status = 400)
+        return jsonify(message = "Field jmbg is missing."), 400
     if len(forename) == 0:
-        return Response("Field forename is missing.", status = 400)
+        return jsonify(message = "Field forename is missing."), 400
     if len(surname) == 0:
-        return Response("Field surname is missing.", status = 400)
+        return jsonify(message = "Field surname is missing."), 400
+    if len(email) == 0:
+        return jsonify(message = "Field email is missing."), 400
+    if len(password) == 0:
+        return jsonify(message = "Field password is missing."), 400
     if not jmbgIsValid(jmbg):
-        return Response("Invalid jmbg.", status = 400)
+        return jsonify(message = "Invalid jmbg."), 400
     if not emailIsValid(email):
-        return Response("Invalid email.", status = 400)
+        return jsonify(message = "Invalid email."), 400
     if not passwordIsValid(password):
-        return Response("Invalid password.", status = 400)
+        return jsonify(message = "Invalid password."), 400
     if User.query.filter(User.email == email).first() is not None:
-        return Response("Email already exists.", status=400)
+        return jsonify(message = "Email already exists."), 400
 
     try:
         user = User(
@@ -66,12 +66,9 @@ def register():
         database.session.add(user)
         database.session.commit()
     except:
-        #return jsonify({'message': 'JMBG already exists.'}), 400;
-        return Response("JMBG already exists.")
+        return jsonify(message="JMBG already exists."), 400
 
     return Response(status = 200)
-
-jwt = JWTManager(application)
 
 @application.route ("/login", methods = ["POST"])
 def login():
@@ -79,16 +76,15 @@ def login():
     password = request.json.get("password", "");
 
     if len(email) == 0:
-        return Response("Field email is missing.", status = 400)
+        return jsonify(message = "Field email is missing."), 400
     if len(password) == 0:
-        return Response("Field password is missing.", status = 400)
+        return jsonify(message = "Field password is missing."), 400
     if not emailIsValid(email):
-        return Response("Invalid email.", status = 400)
+        return jsonify(message="Invalid email."), 400
 
     user = User.query.filter(and_(User.email == email, User.password == password)).first()
     if not user:
-        #return jsonify({'message': 'Invalid credentials.'}), 400;
-        return Response ("Invalid credentials.", status = 400)
+        return jsonify(message = "Invalid credentials."), 400
 
     additionalClaims = {
         "jmbg": user.jmbg,
@@ -105,7 +101,7 @@ def login():
 @application.route("/check", methods=["POST"])
 @jwt_required()
 def check():
-    return "Token is valid"
+    return jsonify(message = "Token is valid."), 200
 
 @application.route("/refresh", methods = ["POST"])
 @jwt_required(refresh = True)
@@ -124,26 +120,25 @@ def refresh():
         accessToken = create_access_token (identity = identity, additional_claims = additionalClaims)
     ), 200
 
-@application.route("/delete", methods=["POST"])
+@application.route("/delete", methods = ["POST"])
 @roleDecorator(role = "admin")
 def delete():
     email = request.json.get("email", "")
 
     if len(email) == 0:
-        #return jsonify({'message': 'Field email is missing.'}), 400;
-        return Response("Field email is missing.", status = 400)
+        return jsonify(message = "Field email is missing."), 400
     if not emailIsValid(email):
-        return Response("Invalid email.", status = 400)
+        return jsonify(message = "Invalid email."), 400
 
     user = User.query.filter(User.email == email).first()
     if not user:
-        return Response("Unknown user.", status = 400)
+        return jsonify(message = "Unknown user."), 400
 
     database.session.delete(user)
     database.session.commit()
 
-    return Response(status = 200)
+    return jsonify(message = "Deleted."), 200
 
 if (__name__ == "__main__"):
     database.init_app(application)
-    application.run(debug = True, host = "0.0.0.0", port = 5002)
+    application.run(debug = True, host = "0.0.0.0", port = 5000)

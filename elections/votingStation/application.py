@@ -1,13 +1,12 @@
 from flask import Flask, request, Response, jsonify
 from elections.configuration import Configuration
 from elections.roleDecorator import roleDecorator
-from elections.utils import nameIsValid, emailIsValid, \
-    passwordIsValid, jmbgIsValid
 from flask_jwt_extended import JWTManager, get_jwt, jwt_required
 from redis import Redis
 import io
 import csv
-import datetime
+from datetime import datetime
+from dateutil.parser import parse
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
@@ -26,8 +25,7 @@ def vote():
     file = request.files.get("file", None)
 
     if file is None:
-        #return jsonify(message='Field file is missing.'), 400;
-        return Response("Field file is missing.", status = 400)
+        return jsonify(message = 'Field file is missing.'), 400
 
     fileData = file.stream.read().decode("utf-8")
     reader = csv.reader(io.StringIO(fileData))
@@ -35,12 +33,14 @@ def vote():
 
     for row in reader:
         if len(row) != 2:
-            #return jsonify(message="Incorrect number of values on line " + str(i) + "."), 400;
-            return Response(f"Incorrect number of values on line {lineCnt}.", status = 400)
+            return jsonify(message = "Incorrect number of values on line " + str(lineCnt) + "."), 400
 
-        voteFor = int(row[1])
-        if voteFor < 0:
-            return Response(f"Incorrect poll number on line  {lineCnt}.", status = 400)
+        try:
+            voteFor = int(row[1])
+            if voteFor < 0:
+                return jsonify(message = f"Incorrect poll number on line {lineCnt}."), 400
+        except:
+            return jsonify(message=f"Incorrect poll number on line {lineCnt}."), 400
 
         lineCnt += 1
 
@@ -48,7 +48,7 @@ def vote():
     #if not jmbgIsValid(jmbg):
         #return Response("Invalid jmbg.", status = 400)
 
-    time = datetime.datetime.now()
+    time = parse(str(datetime.now()))
 
     reader = csv.reader(io.StringIO(fileData))
     lineCnt = 0
@@ -60,10 +60,10 @@ def vote():
                 Configuration.REDIS_LIST,
                 vote
             )
-            print(f"Pushed {lineCnt}. vote with value {vote}")
+            #print(f"Pushed {lineCnt}. vote with value {vote}")
             lineCnt += 1
 
     return Response(status = 200)
 
 if (__name__ == "__main__"):
-    application.run(debug = True)
+    application.run(debug = True, host = "0.0.0.0", port = 5002)

@@ -1,7 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
-from utils import isIndividual
 
 database = SQLAlchemy()
+
+def isIndividual(type):
+    return type == "individual"
 
 class ElectionParticipant(database.Model):
     __tablename__ = "electionparticipants"
@@ -33,14 +35,13 @@ class Participant(database.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "individual": isIndividual(self.type)
         }
 
 class Election(database.Model):
     __tablename__ = "elections"
     id = database.Column(database.Integer, primary_key = True)
-    start = database.Column(database.String(27), nullable = False)
-    end = database.Column(database.String(27), nullable  = False)
+    start = database.Column(database.DateTime, nullable = False)
+    end = database.Column(database.DateTime, nullable = False)
     type = database.Column(database.String(256), nullable = False)
     votes = database.relationship("Vote", back_populates = "election")
     participants = database.relationship("Participant",
@@ -51,15 +52,15 @@ class Election(database.Model):
         return f"{self.id} {self.type} {self.start} {self.end}"
 
     def json(self):
-        participants = []
+        participantsJsons = []
         for participant in self.participants:
-            participants.append(participant.jsonForElection())
+            participantsJsons.append(participant.jsonForElection())
         return {
             "id": self.id,
-            "start": self.start,
-            "end": self.end,
+            "start": str(self.start),
+            "end": str(self.end),
             "individual": isIndividual(self.type),
-            "participants": participants
+            "participants": participantsJsons
         }
 
 class Vote(database.Model):
@@ -73,7 +74,7 @@ class Vote(database.Model):
     invalid = database.Column(database.String(256), nullable = True)
 
     def __repr__(self):
-        return f"{self.id} {self.guid} {self.jmbg} {self.election} {self.voteFor}"
+        return f"{self.guid} {self.jmbg} {self.election} {self.voteFor}"
 
     def json(self):
         return {

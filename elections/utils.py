@@ -3,6 +3,7 @@ import datetime
 from email.utils import parseaddr
 from elections.models import Election, Participant
 from sqlalchemy import and_, or_
+from dateutil.parser import parse
 
 def jmbgIsValid(jmbg):
     if len(jmbg) != 13:
@@ -70,28 +71,24 @@ def participantType(individual):
     return "individual" if individual else "party"
 
 def isIndividual(type):
-    return type == "individual"
+    return str(type) == "individual"
 
 def validStartAndEndDates(start, end):
-   return validIsoTime(start) and validIsoTime(end) and start <= end
-
-def validIsoTime(dt_str):
     try:
-        datetime.fromisoformat(dt_str)
+        parse(start)
+        parse(end)
     except:
-        try:
-            datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
-        except:
-            return False
-        return True
-    return True
+        return False
+    return parse(start) <= parse(end)
+
 
 def electionsBetweenExists(start, end):
+    print (start + " " + end)
     collidingElectionNum = Election.query.filter(
         or_(
-            and_(Election.start <= end, Election.start >= start),
-            and_(Election.end <= end, Election.end >= start),
-            and_(Election.start <= start, Election.end >= end)
+            and_(Election.start <= parse(end), Election.start >= parse(start)),
+            and_(Election.end <= parse(end), Election.end >= parse(start)),
+            and_(Election.start <= parse(start), Election.end >= parse(end))
         )
     ).count()
 
