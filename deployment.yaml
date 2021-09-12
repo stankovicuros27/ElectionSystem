@@ -8,23 +8,25 @@ services:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
+      - TZ=Europe/Belgrade
     ports:
       - 3306:3306
-    volumes:
-      - authenticationdbdata:/var/lib/mysql
+    #volumes:
+      #- authenticationdbdata:/var/lib/mysql
 
   authenticationDBMigration:
     image: authenticationdbmigration
     environment:
       - DATABASE_URL=authenticationDB
+      - TZ=Europe/Belgrade
     depends_on:
       - authenticationDB
-
 
   authentication:
     image: authentication
     environment:
       - DATABASE_URL=authenticationDB
+      - TZ=Europe/Belgrade
     depends_on:
       - authenticationDBMigration
     ports:
@@ -37,15 +39,17 @@ services:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=root
+      - TZ=Europe/Belgrade
     ports:
       - 3307:3306
-    volumes:
-      - electionsdbdata:/var/lib/mysql
+    #volumes:
+      #- electionsdbdata:/var/lib/mysql
 
   electionsDBMigration:
     image: electionsdbmigration
     environment:
       - DATABASE_URL=electionsDB
+      - TZ=Europe/Belgrade
     depends_on:
       - electionsDB
 
@@ -58,6 +62,7 @@ services:
     image: admin
     environment:
       - DATABASE_URL=electionsDB
+      - TZ=Europe/Belgrade
     depends_on:
       - electionsDBMigration
     ports:
@@ -67,6 +72,7 @@ services:
     image: votingstation
     environment:
       - REDIS_HOST=redis
+      - TZ=Europe/Belgrade
     depends_on:
       - redis
     ports:
@@ -77,6 +83,7 @@ services:
     environment:
       - DATABASE_URL=electionsDB
       - REDIS_HOST=redis
+      - TZ=Europe/Belgrade
     depends_on:
       - redis
 
