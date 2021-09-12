@@ -1,6 +1,10 @@
 version: '3'
 
 services:
+
+
+#authentication
+
   authenticationDB:
     image: mysql
     environment:
@@ -9,6 +13,7 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 10s
       retries: 10
+
   authenticationDBMigration:
     image: authenticationdbmigration
     environment:
@@ -16,6 +21,7 @@ services:
     depends_on:
       authenticationDB:
         condition: service_healthy
+
   authentication:
     image: authentication
     environment:
@@ -23,4 +29,61 @@ services:
     depends_on:
       - authenticationDBMigration
     ports:
+      - 5000:5000
+
+
+#elections
+
+  electionsDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+
+  electionsDBMigration:
+    image: electionsdbmigration
+    environment:
+      - DATABASE_URL=electionsDB
+    depends_on:
+      electionsDB:
+        condition: service_healthy
+
+  redis:
+    image: redis
+    depends_on:
+      - electionsDBMigration
+
+  admin:
+    image: admin
+    environment:
+      - DATABASE_URL=electionsDB
+    depends_on:
+      - redis
+    ports:
+      - 5001:5001
+
+  votingStation:
+    image: votingstation
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - admin
+    ports:
       - 5002:5002
+
+  daemon:
+    image: daemon
+    environment:
+      - DATABASE_URL=electionsDB
+      - REDIS_HOST=redis
+    depends_on:
+      - votingStation
+
+#adminer
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
