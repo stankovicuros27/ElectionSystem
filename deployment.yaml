@@ -9,10 +9,14 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - TZ=Europe/Belgrade
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
     ports:
       - 3306:3306
-    #volumes:
-      #- authenticationdbdata:/var/lib/mysql
+    volumes:
+      - authenticationdbdata:/var/lib/mysql
 
   authenticationDBMigration:
     image: authenticationdbmigration
@@ -20,7 +24,8 @@ services:
       - DATABASE_URL=authenticationDB
       - TZ=Europe/Belgrade
     depends_on:
-      - authenticationDB
+      authenticationDB:
+        condition: service_healthy
 
   authentication:
     image: authentication
@@ -40,10 +45,14 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - TZ=Europe/Belgrade
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
     ports:
       - 3307:3306
-    #volumes:
-      #- electionsdbdata:/var/lib/mysql
+    volumes:
+      - electionsdbdata:/var/lib/mysql
 
   electionsDBMigration:
     image: electionsdbmigration
@@ -51,7 +60,8 @@ services:
       - DATABASE_URL=electionsDB
       - TZ=Europe/Belgrade
     depends_on:
-      - electionsDB
+      electionsDB:
+        condition: service_healthy
 
   redis:
     image: redis
