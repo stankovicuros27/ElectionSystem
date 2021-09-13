@@ -17,6 +17,8 @@ services:
       - 3306:3306
     volumes:
       - authenticationdbdata:/var/lib/mysql
+    networks:
+      - authenticationnetwork
 
   authenticationDBMigration:
     image: authenticationdbmigration
@@ -26,6 +28,8 @@ services:
     depends_on:
       authenticationDB:
         condition: service_healthy
+    networks:
+      - authenticationnetwork
 
   authentication:
     image: authentication
@@ -36,6 +40,8 @@ services:
       - authenticationDBMigration
     ports:
       - 5000:5000
+    networks:
+      - authenticationnetwork
 
 
 #elections
@@ -53,6 +59,8 @@ services:
       - 3307:3306
     volumes:
       - electionsdbdata:/var/lib/mysql
+    networks:
+      - electionsnetwork
 
   electionsDBMigration:
     image: electionsdbmigration
@@ -62,11 +70,15 @@ services:
     depends_on:
       electionsDB:
         condition: service_healthy
+    networks:
+      - electionsnetwork
 
   redis:
     image: redis
     ports:
       - 6379:6379
+    networks:
+      - redisnetwork
 
   admin:
     image: admin
@@ -77,6 +89,8 @@ services:
       - electionsDBMigration
     ports:
       - 5001:5001
+    networks:
+      - electionsnetwork
 
   votingStation:
     image: votingstation
@@ -87,6 +101,8 @@ services:
       - redis
     ports:
       - 5002:5002
+    networks:
+      - redisnetwork
 
   daemon:
     image: daemon
@@ -96,11 +112,24 @@ services:
       - TZ=Europe/Belgrade
     depends_on:
       - redis
+    networks:
+      - redisnetwork
+      - electionsnetwork
 
   adminer:
     image: adminer
     ports:
       - 8080:8080
+    networks:
+      - electionsnetwork
+      - authenticationnetwork
+      - adminernetwork
+
+networks:
+  redisnetwork:
+  authenticationnetwork:
+  electionsnetwork:
+  adminernetwork:
 
 volumes:
   authenticationdbdata:
