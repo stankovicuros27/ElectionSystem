@@ -110,9 +110,9 @@ def refresh():
     refreshClaims = get_jwt()
 
     additionalClaims = {
-        "jmbg": refreshClaims["jmbg"],
         "forename": refreshClaims["forename"],
         "surname": refreshClaims["surname"],
+        "jmbg": refreshClaims["jmbg"],
         "role": refreshClaims["role"]
     }
 
@@ -137,7 +137,7 @@ def delete():
     database.session.delete(user)
     database.session.commit()
 
-    return jsonify(message = "Deleted."), 200
+    return jsonify(message = "User deleted."), 200
 
 if (__name__ == "__main__"):
     database.init_app(application)

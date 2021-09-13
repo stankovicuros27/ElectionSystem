@@ -33,8 +33,7 @@ def vote():
 
     for row in reader:
         if len(row) != 2:
-            return jsonify(message = "Incorrect number of values on line " + str(lineCnt) + "."), 400
-
+            return jsonify(message = f"Incorrect number of values on line {lineCnt}."), 400
         try:
             voteFor = int(row[1])
             if voteFor < 0:

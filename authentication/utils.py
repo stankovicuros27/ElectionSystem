@@ -33,10 +33,7 @@ def jmbgIsValid(jmbg):
     if controlNum > 9:
         controlNum = 0
 
-    if controlNum != k:
-        return False
-
-    return True
+    return controlNum == k
 
 def emailIsValid(email):
     if len(email) == 0 or len(email) > 256:

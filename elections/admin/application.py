@@ -39,7 +39,10 @@ def createParticipant():
     #if not nameIsValid(name):
     #    return jsonify(message = "Invalid name."), 400
 
-    participant = Participant(name = name, type = participantType(individual))
+    participant = Participant(
+        name = name,
+        type = participantType(individual)
+    )
     database.session.add(participant)
     database.session.commit()
 
@@ -118,7 +121,7 @@ def getResults():
     id = request.args.get("id", None)
 
     if id is None:
-        return jsonify(message="Field id is missing."), 400
+        return jsonify(message = "Field id is missing."), 400
 
     election = Election.query.filter(Election.id == int(id)).first()
     if not election:
