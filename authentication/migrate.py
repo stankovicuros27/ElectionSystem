@@ -9,32 +9,38 @@ application.config.from_object(Configuration)
 
 migrateObject = Migrate(application, database)
 
-if database_exists(application.config["SQLALCHEMY_DATABASE_URI"]):
-    drop_database(application.config["SQLALCHEMY_DATABASE_URI"])
+done = False
+while not done:
+    try:
+        if database_exists(application.config["SQLALCHEMY_DATABASE_URI"]):
+            drop_database(application.config["SQLALCHEMY_DATABASE_URI"])
 
-if not database_exists(application.config["SQLALCHEMY_DATABASE_URI"]):
-    create_database(application.config["SQLALCHEMY_DATABASE_URI"])
+        if not database_exists(application.config["SQLALCHEMY_DATABASE_URI"]):
+            create_database(application.config["SQLALCHEMY_DATABASE_URI"])
 
-database.init_app(application)
+        database.init_app(application)
+        with application.app_context() as context:
+            init()
+            migrate(message = "Production migration.")
+            upgrade()
 
-with application.app_context() as context:
-    init()
-    migrate(message = "Production migration.")
-    upgrade()
+            adminRole = Role(name = "admin")
+            zvanicnikRole = Role(name = "zvanicnik")
+            database.session.add(adminRole)
+            database.session.add(zvanicnikRole)
+            database.session.commit()
 
-    adminRole = Role(name = "admin")
-    zvanicnikRole = Role(name = "zvanicnik")
-    database.session.add(adminRole)
-    database.session.add(zvanicnikRole)
-    database.session.commit()
+            admin = User(
+                jmbg = "0000000000000",
+                email = "admin@admin.com",
+                password = "1",
+                forename = "admin",
+                surname = "admin",
+                roleId = adminRole.id
+            )
+            database.session.add(admin)
+            database.session.commit()
+            done = True
 
-    admin = User(
-        jmbg = "0000000000000",
-        email = "admin@admin.com",
-        password = "1",
-        forename = "admin",
-        surname = "admin",
-        roleId = adminRole.id
-    )
-    database.session.add(admin)
-    database.session.commit()
+    except Exception as exception:
+        print(exception)
