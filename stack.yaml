@@ -1,0 +1,126 @@
+version: '3'
+
+services:
+
+#authentication
+
+  authenticationDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - TZ=Europe/Belgrade
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - 3306:3306
+    volumes:
+      - authenticationdbdata:/var/lib/mysql
+    networks:
+      - authenticationnetwork
+
+  authenticationDBMigration:
+    image: authenticationdbmigration
+    environment:
+      - DATABASE_URL=authenticationDB
+      - TZ=Europe/Belgrade
+    networks:
+      - authenticationnetwork
+
+  authentication:
+    image: authentication
+    environment:
+      - DATABASE_URL=authenticationDB
+      - TZ=Europe/Belgrade
+    ports:
+      - 5000:5000
+    networks:
+      - authenticationnetwork
+
+
+#elections
+
+  electionsDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - TZ=Europe/Belgrade
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+    ports:
+      - 3307:3306
+    volumes:
+      - electionsdbdata:/var/lib/mysql
+    networks:
+      - electionsnetwork
+
+  electionsDBMigration:
+    image: electionsdbmigration
+    environment:
+      - DATABASE_URL=electionsDB
+      - TZ=Europe/Belgrade
+    networks:
+      - electionsnetwork
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - redisnetwork
+
+  admin:
+    image: admin
+    environment:
+      - DATABASE_URL=electionsDB
+      - TZ=Europe/Belgrade
+    ports:
+      - 5001:5001
+    networks:
+      - electionsnetwork
+
+  votingStation:
+    image: votingstation
+    environment:
+      - REDIS_HOST=redis
+      - TZ=Europe/Belgrade
+    ports:
+      - 5002:5002
+    networks:
+      - redisnetwork
+
+  daemon:
+    image: daemon
+    environment:
+      - DATABASE_URL=electionsDB
+      - REDIS_HOST=redis
+      - TZ=Europe/Belgrade
+    networks:
+      - redisnetwork
+      - electionsnetwork
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - electionsnetwork
+      - authenticationnetwork
+      - adminernetwork
+
+networks:
+  redisnetwork:
+    driver: overlay
+  authenticationnetwork:
+    driver: overlay
+  electionsnetwork:
+    driver: overlay
+  adminernetwork:
+    driver: overlay
+
+volumes:
+  authenticationdbdata:
+  electionsdbdata:
