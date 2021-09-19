@@ -12,6 +12,10 @@ migrateObject = Migrate(application, database)
 done = False
 while not done:
     try:
+        #only from docker
+        #if database_exists(application.config["SQLALCHEMY_DATABASE_URI"]):
+        #    drop_database(application.config["SQLALCHEMY_DATABASE_URI"])
+
         if not database_exists(application.config["SQLALCHEMY_DATABASE_URI"]):
             create_database(application.config["SQLALCHEMY_DATABASE_URI"])
 

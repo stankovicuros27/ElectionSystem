@@ -27,6 +27,7 @@ services:
       - TZ=Europe/Belgrade
     networks:
       - authenticationnetwork
+    restart: "no"
 
   authentication:
     image: authentication
@@ -64,6 +65,7 @@ services:
       - TZ=Europe/Belgrade
     networks:
       - electionsnetwork
+    restart: "no"
 
   redis:
     image: redis

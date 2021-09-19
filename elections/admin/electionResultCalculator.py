@@ -24,16 +24,17 @@ def calculatePartyElection(participantInfos, totalVotesOnElection):
         else:
             underThreshold.append(participantInfos[key])
 
-    while seatsLeft > 0:
-        leadingParty = None
-        maxQuof = -1
-        for party in overThreshold:
-            if party["totalVotes"] / (party["seatsSoFar"] + 1) > maxQuof:
-                maxQuof = party["totalVotes"] / (party["seatsSoFar"] + 1)
-                leadingParty = party
+    if len(overThreshold) > 0:
+        while seatsLeft > 0:
+            leadingParty = None
+            maxQuof = -1
+            for party in overThreshold:
+                if party["totalVotes"] / (party["seatsSoFar"] + 1) > maxQuof:
+                    maxQuof = party["totalVotes"] / (party["seatsSoFar"] + 1)
+                    leadingParty = party
 
-        leadingParty["seatsSoFar"] += 1
-        seatsLeft -= 1
+            leadingParty["seatsSoFar"] += 1
+            seatsLeft -= 1
 
     participantResults = []
     for participantInfo in [*overThreshold, *underThreshold]:
